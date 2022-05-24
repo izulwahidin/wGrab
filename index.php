@@ -1,5 +1,5 @@
 <?php
-require('mainClass.php');
+require('class.php');
 $page = new gogoplay5('https://gogoplay5.com/');
 $pageData = $page->minify()->pages();
 print_r($pageData);
