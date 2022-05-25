@@ -4,6 +4,7 @@ require('class.php');
 
 
 $page = new gogoplay5('https://gogoplay5.com/');
-$pageData = $page->minify()->page()->json(); //WORK
-$pageData = $page->minify()->getPage(); //NULL
-var_dump($pageData);
+$pageData = $page->minify()->getPage(); // hasil yang diharapkan berupa array dari fungsi page()
+// $pageData = $page->minify()->getPage()->json(); // hasil sudah oke berupa json
+
+print_r($pageData);

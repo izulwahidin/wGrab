@@ -97,17 +97,16 @@ class gogoplay5 extends wGrab
 			'time' => $episode_list[7],
 		];
 	}
-	public function page(){
+	private function page(){
 		$list = $this->regexs('/<li class="video-block "><a href="(.*?)"><div class="img"><div class="picture"><img src="(.*?)" alt="(.*?)" \/><\/div><div class="hover_watch"><div class="watch"><\/div><\/div><\/div><div class="name"> (.*?) <\/div><div class="meta"><span class="date">(.*?)<\/span><\/div><\/a><\/li>/');
 		$pagination = $this->regexs('/<li\s+(?:class=(active|\'next\'|\'previous\')|)><a href=\'(.*?)\' data-page=\'(\d+)\'>/');
 
 		$result['list'] = array_map('self::fix_page_list', $list) ?? false;
 		$result['pagination'] = array_map('self::fix_pagination',$pagination) ?? false;
 
-		$this->_arr = $result;
-		return $this;
+		return $result;
 	}
-	public function stream(){
+	private function stream(){
 		$main = $this->regex('/<h1>(.*?)<\/h1><div class="watch_play"><div class="play-video"><iframe src="(.*?)" allowfullscreen="true".*?"content-more-js" id="rmjs-1">(.*?)$/m');
 		$eps_list = $this->regexs('/<li class="video-block "><a href="(.*?)"><div class="img"><div class="picture"><img onerror="this\.src=\'(.*?)\';" src="(.*?)" alt="(.*?)" \/><\/div><div class="hover_watch"><div class="watch"><\/div><\/div><div class="type .*?"><span>(.*?)<\/span><\/div><\/div><div class="name"> (.*?) <\/div><div class="meta"><span class="date">(.*?)<\/span><\/div><\/a><\/li>/');
 		// get latest/side
@@ -121,18 +120,16 @@ class gogoplay5 extends wGrab
 		$result['eps_list'] = array_map('self::fix_episode_list', $eps_list) ?? false;
 		$result['latest_eps'] = array_map('self::fix_page_list', $side) ?? false;
 		
-
-		$this->_arr = $result;
-		return $this;
+		return $result;
 	}
 	
 	public function getPage(){
-		$this->page();
-		return $this->_arr;
+		$this->_arr = $this->page();
+		return $this;
 	}
 	public function getStream(){
 		$this->stream();
-		return $this->_arr;
+		return $this;
 	}
 	public function json(){
 		return json_encode($this->_arr);
