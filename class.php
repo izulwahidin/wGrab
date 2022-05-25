@@ -11,14 +11,14 @@ class wGrab{
 	protected function exp($from, $to){
 		$a = explode($from, $this->_html)[1];
 		$b = explode($to, $a)[0];
-		return $b;
+		return $b ?? null;
 	}
 	protected function regex($ex){
-		if(!preg_match($ex, $this->_html, $result)) return false;
+		if(!preg_match($ex, $this->_html, $result)) return null;
 		return $result;
 	}
 	protected function regexs($ex){
-		if(!preg_match_all($ex, $this->_html, $result, PREG_SET_ORDER, 0)) return false;
+		if(!preg_match_all($ex, $this->_html, $result, PREG_SET_ORDER, 0)) return null;
 		return $result;
 	}
 
@@ -59,10 +59,14 @@ class wGrab{
 
 class gogoplay5 extends wGrab
 {
+	private $_arr; 
+	// private $_stream; 
+	// private $_page; 
+
 	private function fix_page_list($page_list){
 		return [
 			'title' => $page_list[4],
-			'url' => $page_list[1],
+			'url' => explode('"', $page_list[1])[0],
 			// 'url' => '/watch/'.explode('/videos/', $page_list[1])[1],
 			'image' => [
 				'title' => $page_list[3],
@@ -76,32 +80,32 @@ class gogoplay5 extends wGrab
 			'page' => $pagination[3],
 			'url' => $pagination[2],
 			// 'url' => preg_replace('/\?page=(\d+)$/', 'page/$1', $pagination[2]),
-			'status' => str_replace("'", '', $pagination[1]),
+			'status' => (str_replace("'", '', $pagination[1]) == 'active')? true : false,
 		];
 	}
-	private function fix_stream_list($stream_list){
+	private function fix_episode_list($episode_list){
 		return [
-			'title' => $stream_list[6],
-			'url' => $stream_list[1],
-			# 'url' => str_replace('/videos/', '/watch/', $stream_list[1]),
-			'type' => $stream_list[5],
+			'title' => $episode_list[6],
+			'url' => $episode_list[1],
+			# 'url' => str_replace('/videos/', '/watch/', $episode_list[1]),
+			'type' => $episode_list[5],
 			'image' => [
-				'title' => $stream_list[4],
-				'url' => "https://i1.wp.com/".explode('//', $stream_list[2])[1],
-				'onerror' => "https://i1.wp.com/".explode('//', $stream_list[3])[1],
+				'title' => $episode_list[4],
+				'url' => "https://i1.wp.com/".explode('//', $episode_list[2])[1],
+				'onerror' => "https://i1.wp.com/".explode('//', $episode_list[3])[1],
 			],
-			'time' => $stream_list[7],
+			'time' => $episode_list[7],
 		];
 	}
-	public function pages(){
+	public function page(){
 		$list = $this->regexs('/<li class="video-block "><a href="(.*?)"><div class="img"><div class="picture"><img src="(.*?)" alt="(.*?)" \/><\/div><div class="hover_watch"><div class="watch"><\/div><\/div><\/div><div class="name"> (.*?) <\/div><div class="meta"><span class="date">(.*?)<\/span><\/div><\/a><\/li>/');
 		$pagination = $this->regexs('/<li\s+(?:class=(active|\'next\'|\'previous\')|)><a href=\'(.*?)\' data-page=\'(\d+)\'>/');
 
 		$result['list'] = array_map('self::fix_page_list', $list) ?? false;
-		$result['Pagination'] = array_map('self::fix_pagination',$pagination) ?? false;
+		$result['pagination'] = array_map('self::fix_pagination',$pagination) ?? false;
 
-
-		return $result;
+		$this->_arr = $result;
+		return $this;
 	}
 	public function stream(){
 		$main = $this->regex('/<h1>(.*?)<\/h1><div class="watch_play"><div class="play-video"><iframe src="(.*?)" allowfullscreen="true".*?"content-more-js" id="rmjs-1">(.*?)$/m');
@@ -114,11 +118,21 @@ class gogoplay5 extends wGrab
 		$result['title'] = $main[1];
 		$result['iframe'] = $main[2];
 		$result['description'] = explode('</div></div></div><', $main[3])[0];
-		$result['eps_list'] = array_map('self::fix_stream_list', $eps_list) ?? false;
+		$result['eps_list'] = array_map('self::fix_episode_list', $eps_list) ?? false;
 		$result['latest_eps'] = array_map('self::fix_page_list', $side) ?? false;
 		
 
-		return $result;
-		
+		$this->_arr = $result;
+		return $this;
+	}
+	
+	public function getPage(){
+		return $this->_arr;
+	}
+	public function getStream(){
+		return $this->_arr;
+	}
+	public function json(){
+		return json_encode($this->_arr);
 	}
 }
