@@ -128,7 +128,7 @@ class gogoplay5 extends wGrab
 		return $this;
 	}
 	public function getStream(){
-		$this->stream();
+		$this->_arr = $this->stream();
 		return $this;
 	}
 	public function json(){
