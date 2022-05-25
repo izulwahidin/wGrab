@@ -59,9 +59,7 @@ class wGrab{
 
 class gogoplay5 extends wGrab
 {
-	private $_arr; 
-	// private $_stream; 
-	// private $_page; 
+	private $_arr;
 
 	private function fix_page_list($page_list){
 		return [
@@ -130,6 +128,9 @@ class gogoplay5 extends wGrab
 	public function getStream(){
 		$this->_arr = $this->stream();
 		return $this;
+	}
+	public function arr(){
+		return $this->_arr;
 	}
 	public function json(){
 		return json_encode($this->_arr);
